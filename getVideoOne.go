@@ -2,7 +2,7 @@ package main
 
 /*
 投げられたURLの動画を保存する。
-すでにDBにあるチャンネルでないと弾く
+また、そのチャンネルがDBに存在しない場合、追加
 また、すでにある動画は追加されない
 */
 
@@ -20,6 +20,7 @@ import (
 	"strings"
 )
 
+//動画情報
 type videoContent struct {
 	viID  string
 	chID  string
@@ -27,6 +28,7 @@ type videoContent struct {
 	title string
 }
 
+//チャンネル情報
 type channelContent2 struct {
 	chID      string
 	gID       uint
@@ -55,28 +57,21 @@ func main() {
 
 	fmt.Println(viContent)
 
-	if db.CheckExistVideo(viContent.chID, viContent.viID) == 1 {
-		fmt.Println("True!")
-		db.InsertVideo(viContent.viID, viContent.chID, viContent.gID, viContent.title)
-	} else {
-		fmt.Println("False!")
-	}
-
 	switch db.CheckExistVideo(viContent.chID, viContent.viID) {
 	case 1:
 		fmt.Println("チャンネルを確認・動画非重複")
 		db.InsertVideo(viContent.viID, viContent.chID, viContent.gID, viContent.title)
 	case 2:
 		fmt.Println("チャンネルを非確認")
-		chCon2 := getChannelContent2(service, viContent.chID, 1)
+		chCon2 := getChannelContent2(service, viContent.chID, viContent.gID)
 		db.AddChannel(chCon2.chID, chCon2.gID, chCon2.name, chCon2.thumbnail)
 		db.InsertVideo(viContent.viID, chCon2.chID, chCon2.gID, viContent.title)
 	default:
 		fmt.Println("False!")
 	}
-
 }
 
+//APIクライアント生成
 func getClient2() *youtube.Service {
 	developerKey := os.Getenv("youtube_key")
 	client := &http.Client{
@@ -110,22 +105,18 @@ func getVideoContent2(service *youtube.Service, videoID string) videoContent {
 			gID:   groupID,
 			title: resp.Items[0].Snippet.Title,
 		}
-
 	}
+
 	return viContent
 }
 
+//チャンネル情報を取得
 func getChannelContent2(service *youtube.Service, channelID string, gID uint) channelContent2 {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
-
-	//fmt.Println("(チャンネル名： " + resp.Items[0].Snippet.Title + ")")
-	//fmt.Println("チャンネルID： " + channelID)
-	//fmt.Println("サムネ： " + resp.Items[0].Snippet.Thumbnails.Default.Url)
-	//fmt.Println()
 
 	chContent2 := channelContent2{
 		chID:      channelID,
@@ -154,5 +145,6 @@ func checkVideoTime2(videoTime string) bool {
 			return false
 		}
 	}
+	
 	return true
 }

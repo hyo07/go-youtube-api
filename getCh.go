@@ -15,6 +15,7 @@ import (
 	"os"
 )
 
+//チャンネル情報
 type channelContent struct {
 	chID      string
 	gID       uint
@@ -32,9 +33,10 @@ func main() {
 	chContent := getChannelContent1(service, chID, 1)
 
 	fmt.Println(chContent)
-	db.InsertCh(chContent.chID, chContent.gID, chContent.name, chContent.thumbnail)
+	db.AddChannel(chContent.chID, chContent.gID, chContent.name, chContent.thumbnail)
 }
 
+//APIクライアント生成
 func getClient1() *youtube.Service {
 	developerKey := os.Getenv("youtube_key")
 	client := &http.Client{
@@ -47,6 +49,7 @@ func getClient1() *youtube.Service {
 	return service
 }
 
+//チャンネル情報を取得
 func getChannelContent1(service *youtube.Service, channelID string, gID uint) channelContent {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()

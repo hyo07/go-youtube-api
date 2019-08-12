@@ -6,6 +6,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+//チャンネル情報
 type Channel struct {
 	ID           string `gorm:"primary_key"`
 	GroupID      uint
@@ -16,6 +17,7 @@ type Channel struct {
 	Video        []Video `gorm:"foreignkey:ChannelID"`
 }
 
+//該当Vtuberのグループ情報
 type Group struct {
 	ID      uint      `gorm:"primary_key;AUTO_INCREMENT"`
 	Name    string    `gorm:"unique;not null"`
@@ -23,6 +25,7 @@ type Group struct {
 	Video   []Video   `gorm:"foreignkey:GroupID"`
 }
 
+//動画情報
 type Video struct {
 	ID           string `gorm:"primary_key"`
 	ChannelID    string
@@ -77,29 +80,37 @@ func main() {
 	//fmt.Println(checkExistVideo("UCQ0UDLQCjY0rmuxCDE38FGg", "jcCGvpvxqVQ"))
 	//SearchGroup("UCQ0UDLQCjY0rmuxCDE38FGg")
 
-	ChangeChGroup("UCXTpFs_3PqI41qX2d9tL2Rw", 3)
+	//ChangeChGroup("UCXTpFs_3PqI41qX2d9tL2Rw", 2)
 }
 
-func InsertCh(chID string, gID uint, name string, thumbnail string) {
+//新しくチャンネルをDBに追加
+func AddChannel(chID string, gID uint, name string, thumbnail string) {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
 		panic("failed to connect database")
 	}
 	defer db.Close()
-	db.LogMode(true)
+	//db.LogMode(true)
 
-	var chs Channel
-
-	chs = Channel{
-		ID:        chID,
-		GroupID:   gID,
-		Name:      name,
-		Thumbnail: thumbnail,
+	var channel Channel
+	db.Where("id = ?", chID).Find(&channel)
+	//重複チェック
+	if channel.ID != "" {
+		panic("既に存在します(channel)")
+	} else {
+		channel = Channel{
+			ID:        chID,
+			GroupID:   gID,
+			Name:      name,
+			Thumbnail: thumbnail,
+		}
+		db.NewRecord(&channel)
+		db.Create(&channel)
+		fmt.Println("チャンネルを追加しました")
 	}
-	db.NewRecord(&chs)
-	db.Create(&chs)
 }
 
+//渡された動画が既にDBにないか確認
 func CheckExistVideo(chID string, viID string) int {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
@@ -112,6 +123,7 @@ func CheckExistVideo(chID string, viID string) int {
 	var channels Channel
 
 	db.Where("id = ?", chID).Find(&channels)
+	//チャンネルすら無いのか・チャンネルはあるが動画はないのか・どっちも既にあるのか
 	if channels.ID == "" {
 		fmt.Println("存在しません(channel)")
 		return 2
@@ -126,6 +138,7 @@ func CheckExistVideo(chID string, viID string) int {
 	return 1
 }
 
+//動画をDBに保存
 func InsertVideo(viID string, chID string, gID uint, title string) {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
@@ -147,6 +160,7 @@ func InsertVideo(viID string, chID string, gID uint, title string) {
 	fmt.Println("動画を追加しました")
 }
 
+//該当チャンネルの所属グループを確認
 func SearchGroup(chID string) uint {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
@@ -159,34 +173,15 @@ func SearchGroup(chID string) uint {
 	db.Where("id = ?", chID).Find(&channel)
 	//fmt.Println(channel.GroupID)
 
-	return channel.GroupID
-}
-
-func AddChannel(chID string, gID uint, name string, thumbnail string) {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
-	defer db.Close()
-	//db.LogMode(true)
-
-	var channel Channel
-	db.Where("id = ?", chID).Find(&channel)
-	if channel.ID != "" {
-		panic("既に存在します(channel)")
+	//所属グループが割り振られてい無い場合、1（その他）を入れる
+	if channel.GroupID == 0 {
+		return 1
 	} else {
-		channel = Channel{
-			ID:        chID,
-			GroupID:   gID,
-			Name:      name,
-			Thumbnail: thumbnail,
-		}
-		db.NewRecord(&channel)
-		db.Create(&channel)
-		fmt.Println("チャンネルを追加しました")
+		return channel.GroupID
 	}
 }
 
+//該当チャンネル、および投稿動画のグループを変更
 func ChangeChGroup(chID string, newGroupID uint) {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
@@ -200,10 +195,20 @@ func ChangeChGroup(chID string, newGroupID uint) {
 
 	if group.ID != 0 {
 		var channel Channel
+		var videos []Video
 
+		//チャンネルのGroupIDを変更
 		db.Where("id = ?", chID).Take(&channel)
 		channel.GroupID = newGroupID
 		db.Save(&channel)
+
+		//該当チャンネルの持つ投稿動画を全て変更
+		db.Find(&videos).Where("channel_id = ?", chID)
+		for i, _ := range videos {
+			videos[i].GroupID = newGroupID
+			db.Save(&videos[i])
+		}
+		fmt.Println("グループを変更しました")
 	} else {
 		fmt.Println("存在しないグループです")
 	}
