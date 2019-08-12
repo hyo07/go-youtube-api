@@ -6,6 +6,7 @@ package main
 */
 
 import (
+	"flag"
 	"fmt"
 	"google.golang.org/api/googleapi/transport"
 	"google.golang.org/api/youtube/v3"
@@ -20,11 +21,11 @@ import (
 var reM = make(map[string]string)
 
 func main() {
-	//flag.Parse()
-	//args := flag.Args()
-	//
-	//u, err := url.Parse(args[0])
-	u, err := url.Parse("https://www.youtube.com/watch?v=5DfRzFrmHzQ")
+	flag.Parse()
+	args := flag.Args()
+
+	u, err := url.Parse(args[0])
+	//u, err := url.Parse("https://www.youtube.com/watch?v=5DfRzFrmHzQ")
 	if err != nil {
 		panic("ERRORRRORROR")
 	}
@@ -87,6 +88,7 @@ func getChannelContent(service *youtube.Service, channelID string) {
 
 	fmt.Println("(チャンネル名： " + resp.Items[0].Snippet.Title + ")")
 	fmt.Println("チャンネルID： " + channelID)
+	fmt.Println("サムネ： " + resp.Items[0].Snippet.Thumbnails.Default.Url)
 	fmt.Println()
 
 	//fmt.Println(resp.Items[0].Snippet.Description)

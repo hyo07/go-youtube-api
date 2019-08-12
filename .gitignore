@@ -3,3 +3,4 @@ go.mod
 go.mod/
 show.txt
 memo.txt
+*.sqlite3

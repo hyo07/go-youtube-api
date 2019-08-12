@@ -83,7 +83,6 @@ func GetSingPlaylist(service *youtube.Service, channelID string) string {
 
 	asari = func(ind int64, token string) {
 		call := service.Playlists.List("snippet,contentDetails").ChannelId(channelID).MaxResults(50).PageToken(token)
-		fmt.Println("Do!!!!!")
 		resp, err := call.Do()
 		if err != nil {
 			panic(err)

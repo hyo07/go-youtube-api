@@ -49,4 +49,15 @@ func main() {
 
 	fmt.Println(contents)
 
+	channel := map[string]string{
+		"chID":         "UCQ0UDLQCjY0rmuxCDE38FGg",
+		"title":        "Matsuri Channel 夏色まつり",
+		"description":  "チャンネル概要",
+		"thumbnailURL": "https://yt3.ggpht.com/a/AGF-l7_MTJEH9Kn-cVznPJPBt4v0BOkmd5btoSdz6Q=s88-c-k-c0xffffffff-no-rj-mo",
+		"groupID":      "holo",
+	}
+
+	fmt.Println()
+	fmt.Println(channel)
+
 }
