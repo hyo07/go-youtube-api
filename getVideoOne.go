@@ -55,7 +55,9 @@ func main() {
 	service := getClient2()
 	viContent := getVideoContent2(service, videoID)
 
-	fmt.Println(viContent)
+	if !db.CheckExistGroup(viContent.gID) {
+		panic("与えられたグループが存在しません")
+	}
 
 	switch db.CheckExistVideo(viContent.chID, viContent.viID) {
 	case 1:
@@ -145,6 +147,6 @@ func checkVideoTime2(videoTime string) bool {
 			return false
 		}
 	}
-	
+
 	return true
 }

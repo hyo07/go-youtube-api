@@ -7,12 +7,12 @@ package main
 import (
 	"api_test/db"
 	"flag"
-	"fmt"
 	"google.golang.org/api/googleapi/transport"
 	"google.golang.org/api/youtube/v3"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 //チャンネル情報
@@ -28,11 +28,20 @@ func main() {
 	args := flag.Args()
 
 	chID := args[0]
+	var gID uint
+	inputGID, err := strconv.ParseUint(args[1], 10, 32)
+	if err != nil {
+		panic("第２引数はuintで入力してください")
+	}
+	gID = uint(inputGID)
+
+	if !db.CheckExistGroup(gID) {
+		panic("与えられたグループが存在しません")
+	}
 
 	service := getClient1()
-	chContent := getChannelContent1(service, chID, 1)
+	chContent := getChannelContent1(service, chID, gID)
 
-	fmt.Println(chContent)
 	db.AddChannel(chContent.chID, chContent.gID, chContent.name, chContent.thumbnail)
 }
 

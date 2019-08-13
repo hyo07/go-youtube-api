@@ -54,6 +54,10 @@ func main() {
 
 	groupID := db.SearchGroup(chID)
 
+	if !db.CheckExistGroup(groupID) {
+		panic("与えられたグループが存在しません")
+	}
+
 	for _, video := range ret {
 		fmt.Println("------------------------------------------")
 		switch db.CheckExistVideo(video["channelID"], video["videoID"]) {

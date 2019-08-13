@@ -214,3 +214,22 @@ func ChangeChGroup(chID string, newGroupID uint) {
 	}
 
 }
+
+//グループの存在を確認
+func CheckExistGroup(gID uint) bool {
+	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer db.Close()
+	//db.LogMode(true)
+
+	var group Group
+
+	db.Where("id = ?", gID).Find(&group)
+	if group.ID == 0 {
+		return false
+	} else {
+		return true
+	}
+}
