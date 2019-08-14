@@ -69,8 +69,8 @@ func getChannelContent1(service *youtube.Service, channelID string, gID uint) ch
 	chContent := channelContent{
 		chID:      channelID,
 		gID:       gID,
-		name:      resp.Items[0].Snippet.Thumbnails.Default.Url,
-		thumbnail: resp.Items[0].Snippet.Title,
+		name:      resp.Items[0].Snippet.Title,
+		thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
 	}
 
 	return chContent
