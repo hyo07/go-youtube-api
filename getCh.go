@@ -15,14 +15,6 @@ import (
 	"strconv"
 )
 
-//チャンネル情報
-type channelContent struct {
-	chID      string
-	gID       uint
-	name      string
-	thumbnail string
-}
-
 func main() {
 	flag.Parse()
 	args := flag.Args()
@@ -42,7 +34,7 @@ func main() {
 	service := getClient1()
 	chContent := getChannelContent1(service, chID, gID)
 
-	db.AddChannel(chContent.chID, chContent.gID, chContent.name, chContent.thumbnail)
+	db.AddChannel(chContent.ID, chContent.GroupID, chContent.Name, chContent.Thumbnail)
 }
 
 //APIクライアント生成
@@ -59,18 +51,18 @@ func getClient1() *youtube.Service {
 }
 
 //チャンネル情報を取得
-func getChannelContent1(service *youtube.Service, channelID string, gID uint) channelContent {
+func getChannelContent1(service *youtube.Service, channelID string, gID uint) db.Channel {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	chContent := channelContent{
-		chID:      channelID,
-		gID:       gID,
-		name:      resp.Items[0].Snippet.Title,
-		thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
+	chContent := db.Channel{
+		ID:        channelID,
+		GroupID:   gID,
+		Name:      resp.Items[0].Snippet.Title,
+		Thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
 	}
 
 	return chContent

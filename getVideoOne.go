@@ -20,22 +20,6 @@ import (
 	"strings"
 )
 
-//動画情報
-type videoContent struct {
-	viID  string
-	chID  string
-	gID   uint
-	title string
-}
-
-//チャンネル情報
-type channelContent2 struct {
-	chID      string
-	gID       uint
-	name      string
-	thumbnail string
-}
-
 func main() {
 	flag.Parse()
 	args := flag.Args()
@@ -55,19 +39,19 @@ func main() {
 	service := getClient2()
 	viContent := getVideoContent2(service, videoID)
 
-	if !db.CheckExistGroup(viContent.gID) {
+	if !db.CheckExistGroup(viContent.GroupID) {
 		panic("与えられたグループが存在しません")
 	}
 
-	switch db.CheckExistVideo(viContent.chID, viContent.viID) {
+	switch db.CheckExistVideo(viContent.ChannelID, viContent.ID) {
 	case 1:
 		fmt.Println("チャンネルを確認・動画非重複")
-		db.InsertVideo(viContent.viID, viContent.chID, viContent.gID, viContent.title)
+		db.InsertVideo(viContent.ID, viContent.ChannelID, viContent.GroupID, viContent.Title)
 	case 2:
 		fmt.Println("チャンネルを非確認")
-		chCon2 := getChannelContent2(service, viContent.chID, viContent.gID)
-		db.AddChannel(chCon2.chID, chCon2.gID, chCon2.name, chCon2.thumbnail)
-		db.InsertVideo(viContent.viID, chCon2.chID, chCon2.gID, viContent.title)
+		chCon2 := getChannelContent2(service, viContent.ChannelID, viContent.GroupID)
+		db.AddChannel(chCon2.ID, chCon2.GroupID, chCon2.Name, chCon2.Thumbnail)
+		db.InsertVideo(viContent.ID, chCon2.ID, chCon2.GroupID, viContent.Title)
 	default:
 		fmt.Println("False!")
 	}
@@ -87,25 +71,25 @@ func getClient2() *youtube.Service {
 }
 
 //各動画の中身を漁る
-func getVideoContent2(service *youtube.Service, videoID string) videoContent {
+func getVideoContent2(service *youtube.Service, videoID string) db.Video {
 	call := service.Videos.List("snippet,contentDetails").Id(videoID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	var viContent videoContent
+	var viContent db.Video
 
 	//非公開動画は除外・時間で動画のみ抽出
 	if (resp.Items[0].Snippet.Title != "Private video") && (checkVideoTime2(resp.Items[0].ContentDetails.Duration)) {
 
 		groupID := db.SearchGroup(resp.Items[0].Snippet.ChannelId)
 
-		viContent = videoContent{
-			viID:  videoID,
-			chID:  resp.Items[0].Snippet.ChannelId,
-			gID:   groupID,
-			title: resp.Items[0].Snippet.Title,
+		viContent = db.Video{
+			ID:        videoID,
+			ChannelID: resp.Items[0].Snippet.ChannelId,
+			GroupID:   groupID,
+			Title:     resp.Items[0].Snippet.Title,
 		}
 	}
 
@@ -113,18 +97,18 @@ func getVideoContent2(service *youtube.Service, videoID string) videoContent {
 }
 
 //チャンネル情報を取得
-func getChannelContent2(service *youtube.Service, channelID string, gID uint) channelContent2 {
+func getChannelContent2(service *youtube.Service, channelID string, gID uint) db.Channel {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	chContent2 := channelContent2{
-		chID:      channelID,
-		gID:       gID,
-		name:      resp.Items[0].Snippet.Title,
-		thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
+	chContent2 := db.Channel{
+		ID:        channelID,
+		GroupID:   gID,
+		Name:      resp.Items[0].Snippet.Title,
+		Thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
 	}
 
 	return chContent2

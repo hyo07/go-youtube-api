@@ -45,42 +45,15 @@ func main() {
 	db.LogMode(true)
 	db.AutoMigrate(&Channel{}, &Group{}, &Video{})
 
-	//channel := Channel{
-	//	ID:           "UCQ0UDLQCjY0rmuxCDE38FGg",
-	//	GroupID:      1,
-	//	Name:         "Matsuri Channel 夏色まつり",
-	//	Thumbnail:    "https://yt3.ggpht.com/a/AGF-l7_MTJEH9Kn-cVznPJPBt4v0BOkmd5btoSdz6Q=s88-c-k-c0xffffffff-no-rj-mo",
-	//	Descripition: "チャンネル説明",
-	//}
-	//db.NewRecord(&channel)
-	//db.Create(&channel)
-	//
-	//group := Group{
-	//	ID:   2,
-	//	Name: "ホロライブ",
-	//}
-	//db.NewRecord(&group)
-	//db.Create(&group)
-	//
-	//video := Video{
-	//	ID:           "jcCGvpvxqVQ",
-	//	ChannelID:    "UCQ0UDLQCjY0rmuxCDE38FGg",
-	//	GroupID:      1,
-	//	Title:        "【誕生日！】愛言葉Ⅲ／夏色まつり cover",
-	//	Descripition: "動画説明",
-	//}
-	//db.NewRecord(&video)
-	//db.Create(&video)
-
-	//var videos Video
-	//db.Find(&videos).Related(&videos.Channel).Related(&videos.Group)
-	//fmt.Println(videos)
-
 	//fmt.Println(checkExistVideo("UCQ0UDLQCjY0rmuxCDE38FGgあ", "hoge"))
 	//fmt.Println(checkExistVideo("UCQ0UDLQCjY0rmuxCDE38FGg", "jcCGvpvxqVQ"))
 	//SearchGroup("UCQ0UDLQCjY0rmuxCDE38FGg")
 
 	//ChangeChGroup("UCXTpFs_3PqI41qX2d9tL2Rw", 2)
+
+	//var videos Video
+	//db.First(&videos).Related(&videos.Channel, "Channel")
+	//fmt.Println(videos)
 }
 
 //新しくチャンネルをDBに追加

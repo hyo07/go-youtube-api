@@ -18,14 +18,6 @@ import (
 	"strings"
 )
 
-//チャンネル情報
-type channelContent3 struct {
-	chID      string
-	gID       uint
-	name      string
-	thumbnail string
-}
-
 func main() {
 	flag.Parse()
 	args := flag.Args()
@@ -67,7 +59,7 @@ func main() {
 		case 2:
 			fmt.Println("チャンネルを非確認")
 			chCon3 := getChannelContent3(service, video["channelID"], groupID)
-			db.AddChannel(chCon3.chID, chCon3.gID, chCon3.name, chCon3.thumbnail)
+			db.AddChannel(chCon3.ID, chCon3.GroupID, chCon3.Name, chCon3.Thumbnail)
 			db.InsertVideo(video["videoID"], video["channelID"], groupID, video["title"])
 		default:
 			fmt.Println("動画追加済み")
@@ -237,18 +229,18 @@ func checkVideoTime3(videoTime string) bool {
 }
 
 //チャンネル情報を取得
-func getChannelContent3(service *youtube.Service, channelID string, gID uint) channelContent3 {
+func getChannelContent3(service *youtube.Service, channelID string, gID uint) db.Channel {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	chContent3 := channelContent3{
-		chID:      channelID,
-		gID:       gID,
-		name:      resp.Items[0].Snippet.Title,
-		thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
+	chContent3 := db.Channel{
+		ID:        channelID,
+		GroupID:   gID,
+		Name:      resp.Items[0].Snippet.Title,
+		Thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
 	}
 
 	return chContent3
