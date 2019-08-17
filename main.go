@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api_test/back"
 	"api_test/callAPI"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,7 +20,7 @@ func main() {
 	//INDEX
 	//全動画からランダムで表示
 	router.GET("/index", func(ctx *gin.Context) {
-		ctx.HTML(200, "index.html", gin.H{"videos": callAPI.RandomVideos()})
+		ctx.HTML(200, "index.html", gin.H{"videos": back.RandomVideos()})
 	})
 
 	//新しく動画を追加
@@ -35,8 +36,8 @@ func main() {
 
 	//チャンネル情報と、そのチャンネルの動画を全て表示
 	router.GET("/channel/:chID", func(ctx *gin.Context) {
-		videos := callAPI.ChannelContents(ctx.Param("chID"))
-		channel := callAPI.ChannelInfo(ctx.Param("chID"))
+		videos := back.ChannelContents(ctx.Param("chID"))
+		channel := back.ChannelInfo(ctx.Param("chID"))
 		ctx.HTML(200, "channel.html", gin.H{"videos": videos, "channel": channel})
 	})
 
@@ -47,19 +48,19 @@ func main() {
 		if err != nil {
 			panic("/group/" + n)
 		}
-		videos := callAPI.GroupContents(uint(gID))
-		group := callAPI.GroupInfo(uint(gID))
+		videos := back.GroupContents(uint(gID))
+		group := back.GroupInfo(uint(gID))
 		ctx.HTML(200, "group.html", gin.H{"videos": videos, "group": group})
 	})
 
 	//チャンネルのリスト
 	router.GET("/channels", func(ctx *gin.Context) {
-		ctx.HTML(200, "listCh.html", gin.H{"channels": callAPI.ChannelList()})
+		ctx.HTML(200, "listCh.html", gin.H{"channels": back.ChannelList()})
 	})
 
 	//グループのリスト
 	router.GET("/groups", func(ctx *gin.Context) {
-		ctx.HTML(200, "listGr.html", gin.H{"groups": callAPI.GroupList()})
+		ctx.HTML(200, "listGr.html", gin.H{"groups": back.GroupList()})
 	})
 
 	router.Run()

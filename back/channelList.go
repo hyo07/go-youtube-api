@@ -1,11 +1,12 @@
-package callAPI
+package back
 
 import (
 	"api_test/db"
 	"github.com/jinzhu/gorm"
 )
 
-func GroupContents(gID uint) []db.Video {
+//DB上の全てのチャンネル取得
+func ChannelList() []db.Channel {
 	database, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
 		panic("failed to connect database")
@@ -13,8 +14,8 @@ func GroupContents(gID uint) []db.Video {
 	defer database.Close()
 	database.LogMode(true)
 
-	var videos []db.Video
-	database.Where("group_id = ?", gID).Preload("Channel").Find(&videos)
+	var channels []db.Channel
+	database.Preload("Group").Find(&channels)
 
-	return videos
+	return channels
 }

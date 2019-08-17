@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	a := callAPI.GroupList()
-	fmt.Println(a)
-
+	status, message := callAPI.GetVideo("https://www.youtube.com/watch?v=ad-6W3bazMs&list=PLpt61bADOMwW2aA9I1hWHyR8OixSuCXzc&index=2")
+	fmt.Println(status)
+	fmt.Println(message)
 }

@@ -1,11 +1,12 @@
-package callAPI
+package back
 
 import (
 	"api_test/db"
 	"github.com/jinzhu/gorm"
 )
 
-func RandomVideos() []db.Video {
+//チャンネル情報取得
+func ChannelInfo(chID string) db.Channel {
 	database, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
 		panic("failed to connect database")
@@ -13,8 +14,8 @@ func RandomVideos() []db.Video {
 	defer database.Close()
 	database.LogMode(true)
 
-	var videos []db.Video
-	database.Order("RANDOM()").Limit(5).Preload("Channel").Find(&videos)
+	var channel db.Channel
+	database.Where("id = ?", chID).Preload("Group").First(&channel)
 
-	return videos
+	return channel
 }
