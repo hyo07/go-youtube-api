@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+
+<header>
+    <label><a href="/index">index</a></label>
+    <label><a href="/channels">channels</a></label>
+    <label><a href="/groups">groups</a></label>
+</header>
+
+<body>
+
+{{if .message}}
+    <h1 style="color: red">{{.message}}</h1>
+{{end}}
+
+<h2>追加</h2>
+<form method="post" action="/add">
+    <p><input type="url" name="video-url" placeholder="動画URLを入力"></p>
+    <p><input type="submit" value="Send"></p>
+</form>
+
+<div>
+    <ul>
+        {{range .videos}}
+            <ul>
+                <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt=""></li>
+                <li>Title: {{.Title}}</li>
+                <li>Channel: {{.Channel.Name}} <a href="/channel/{{.ChannelID}}">個別ページへ飛ぶ</a></li>
+                <li><a href="https://www.youtube.com/watch?v={{.ID}}" target="_blank">リンク</a></li>
+                <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+            </ul>
+        {{end}}
+    </ul>
+</div>
+
+</body>
+</html>
