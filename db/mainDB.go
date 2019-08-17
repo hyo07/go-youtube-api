@@ -37,10 +37,7 @@ type Video struct {
 }
 
 func main() {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	db.LogMode(true)
 	db.AutoMigrate(&Channel{}, &Group{}, &Video{})
@@ -56,12 +53,17 @@ func main() {
 	//fmt.Println(videos)
 }
 
-//新しくチャンネルをDBに追加
-func AddChannel(chID string, gID uint, name string, thumbnail string) {
+func ConnectDB() *gorm.DB {
 	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
 	if err != nil {
 		panic("failed to connect database")
 	}
+	return db
+}
+
+//新しくチャンネルをDBに追加
+func AddChannel(chID string, gID uint, name string, thumbnail string) {
+	db := ConnectDB()
 	defer db.Close()
 	//db.LogMode(true)
 
@@ -85,10 +87,7 @@ func AddChannel(chID string, gID uint, name string, thumbnail string) {
 
 //渡された動画が既にDBにないか確認
 func CheckExistVideo(chID string, viID string) int {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	//db.LogMode(true)
 
@@ -113,10 +112,7 @@ func CheckExistVideo(chID string, viID string) int {
 
 //動画をDBに保存
 func InsertVideo(viID string, chID string, gID uint, title string) {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	db.LogMode(true)
 
@@ -135,10 +131,7 @@ func InsertVideo(viID string, chID string, gID uint, title string) {
 
 //該当チャンネルの所属グループを確認
 func SearchGroup(chID string) uint {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	//db.LogMode(true)
 
@@ -156,10 +149,7 @@ func SearchGroup(chID string) uint {
 
 //該当チャンネル、および投稿動画のグループを変更
 func ChangeChGroup(chID string, newGroupID uint) {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	//db.LogMode(true)
 
@@ -190,10 +180,7 @@ func ChangeChGroup(chID string, newGroupID uint) {
 
 //グループの存在を確認
 func CheckExistGroup(gID uint) bool {
-	db, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := ConnectDB()
 	defer db.Close()
 	//db.LogMode(true)
 

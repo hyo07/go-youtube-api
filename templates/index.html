@@ -24,11 +24,21 @@
     <p><input type="submit" value="Send"></p>
 </form>
 
+<h2>検索</h2>
+<form method="get" action="/index">
+    <p><input type="text" name="viName" placeholder="動画名を入力"></p>
+    <p><input type="submit" value="Send"></p>
+</form>
+
 <div>
     <ul>
         {{range .videos}}
             <ul>
-                <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt=""></li>
+                <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt="">
+                    <label><a href="/video/{{.ID}}">詳細</a></label></li>
+                {{/*                <iframe width="560" height="315" src="https://www.youtube.com/embed/{{.ID}}" frameborder="0"*/}}
+                {{/*                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"*/}}
+                {{/*                        allowfullscreen></iframe>*/}}
                 <li>Title: {{.Title}}</li>
                 <li>Channel: {{.Channel.Name}} <a href="/channel/{{.ChannelID}}">個別ページへ飛ぶ</a></li>
                 <li><a href="https://www.youtube.com/watch?v={{.ID}}" target="_blank">リンク</a></li>

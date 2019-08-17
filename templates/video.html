@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+
+<header>
+    <label><a href="/index">index</a></label>
+    <label><a href="/channels">channels</a></label>
+    <label><a href="/groups">groups</a></label>
+</header>
+
+<body>
+<div>
+    <h2>ビデオ情報</h2>
+    <ul>
+        <li>タイトル: {{.video.Title}}</li>
+        <li>URL: <a href="https://www.youtube.com/watch?v={{.video.ID}}">リンク</a></li>
+        <li><img src="https://i.ytimg.com/vi/{{.video.ID}}/default.jpg" alt=""></li>
+    </ul>
+    <h2>その他情報</h2>
+    <ul>
+        <li>チャンネル: {{.video.Channel.Name}} <a href="/channel/{{.video.ChannelID}}">個別ページへ飛ぶ</a></li>
+        <li>グループID: {{.video.GroupID}}</li>
+        <li>グループ名: {{.video.Group.Name}} <a href="/group/{{.video.GroupID}}">グループページへ飛ぶ</a></li>
+    </ul>
+</div>
+
+</body>
+</html>

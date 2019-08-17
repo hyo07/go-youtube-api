@@ -14,13 +14,9 @@
 
 <body>
 
-{{if .message}}
-    <h1 style="color: red">{{.message}}</h1>
-{{end}}
-
-<h2>追加</h2>
-<form method="post" action="/add">
-    <p><input type="url" name="video-url" placeholder="動画URLを入力"></p>
+<h2>検索</h2>
+<form method="get" action="/channels">
+    <p><input type="text" name="chName" placeholder="チャンネル名を入力"></p>
     <p><input type="submit" value="Send"></p>
 </form>
 
@@ -30,7 +26,7 @@
             <ul>
                 <li><img src="{{.Thumbnail}}" alt=""></li>
                 <li>Title: {{.Name}}</li>
-                <li>グループ: {{.Group.Name}}    <a href="/group/{{.GroupID}}">グループページへ飛ぶ</a></li>
+                <li>グループ: {{.Group.Name}} <a href="/group/{{.GroupID}}">グループページへ飛ぶ</a></li>
                 <li><a href="/channel/{{.ID}}">個別ページへ飛ぶ</a></li>
                 <li><a href="https://www.youtube.com/channel/{{.ID}}">リンク</a></li>
                 <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>

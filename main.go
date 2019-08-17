@@ -20,7 +20,12 @@ func main() {
 	//INDEX
 	//全動画からランダムで表示
 	router.GET("/index", func(ctx *gin.Context) {
-		ctx.HTML(200, "index.html", gin.H{"videos": back.RandomVideos()})
+		viName := ctx.Query("viName")
+		if viName == "" {
+			ctx.HTML(200, "index.html", gin.H{"videos": back.RandomVideos()})
+		} else {
+			ctx.HTML(200, "index.html", gin.H{"videos": back.RandomSearchVideos(viName)})
+		}
 	})
 
 	//新しく動画を追加
@@ -32,6 +37,12 @@ func main() {
 		} else {
 			ctx.HTML(200, "add.html", gin.H{"message": message})
 		}
+	})
+
+	//ビデオ詳細
+	router.GET("/video/:vID", func(ctx *gin.Context) {
+		video := back.VideoInfo(ctx.Param("vID"))
+		ctx.HTML(200, "video.html", gin.H{"video": video})
 	})
 
 	//チャンネル情報と、そのチャンネルの動画を全て表示
@@ -46,7 +57,7 @@ func main() {
 		n := ctx.Param("gID")
 		gID, err := strconv.Atoi(n)
 		if err != nil {
-			panic("/group/" + n)
+			gID = 1
 		}
 		videos := back.GroupContents(uint(gID))
 		group := back.GroupInfo(uint(gID))
@@ -55,7 +66,12 @@ func main() {
 
 	//チャンネルのリスト
 	router.GET("/channels", func(ctx *gin.Context) {
-		ctx.HTML(200, "listCh.html", gin.H{"channels": back.ChannelList()})
+		chName := ctx.Query("chName")
+		if chName == "" {
+			ctx.HTML(200, "listCh.html", gin.H{"channels": back.ChannelList()})
+		} else {
+			ctx.HTML(200, "listCh.html", gin.H{"channels": back.ChannelSearchList(chName)})
+		}
 	})
 
 	//グループのリスト

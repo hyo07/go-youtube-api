@@ -2,20 +2,27 @@ package back
 
 import (
 	"api_test/db"
-	"github.com/jinzhu/gorm"
 )
 
 //DB上の全てのチャンネル取得
 func ChannelList() []db.Channel {
-	database, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	database := db.ConnectDB()
 	defer database.Close()
 	database.LogMode(true)
 
 	var channels []db.Channel
-	database.Preload("Group").Find(&channels)
+	database.Order("name").Preload("Group").Find(&channels)
+
+	return channels
+}
+
+func ChannelSearchList(chName string) []db.Channel {
+	database := db.ConnectDB()
+	defer database.Close()
+	database.LogMode(true)
+
+	var channels []db.Channel
+	database.Order("name").Where("name LIKE ?", "%"+chName+"%").Preload("Group").Find(&channels)
 
 	return channels
 }

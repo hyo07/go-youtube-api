@@ -2,15 +2,11 @@ package back
 
 import (
 	"api_test/db"
-	"github.com/jinzhu/gorm"
 )
 
 //チャンネル情報取得
 func ChannelInfo(chID string) db.Channel {
-	database, err := gorm.Open("sqlite3", "./db/test.sqlite3")
-	if err != nil {
-		panic("failed to connect database")
-	}
+	database := db.ConnectDB()
 	defer database.Close()
 	database.LogMode(true)
 
