@@ -10,20 +10,10 @@ import (
 	"api_test/db"
 	"fmt"
 	"google.golang.org/api/youtube/v3"
-	"net/url"
 )
 
 func GetVideo(inputURL string) (bool, string) {
-	u, err := url.Parse(inputURL)
-	if (err != nil) || u.Host != "www.youtube.com" {
-		return false, "URLが正しくありません"
-	}
-	var videoID string
-	for k, v := range u.Query() {
-		if k == "v" {
-			videoID = v[0]
-		}
-	}
+	videoID := Url2viID(inputURL)
 	if videoID == "" {
 		return false, "URLが正しくありません"
 	}
@@ -42,12 +32,15 @@ func GetVideo(inputURL string) (bool, string) {
 		fmt.Println("チャンネルを確認・動画非重複")
 		db.InsertVideo(viContent.ID, viContent.ChannelID, viContent.GroupID, viContent.Title)
 		return true, "動画を追加しました"
+	//TODO ここどうする？ ＞ アイフル
 	case 2:
-		fmt.Println("チャンネルを非確認")
-		chCon2 := GetChannelContent(service, viContent.ChannelID, viContent.GroupID)
-		db.AddChannel(chCon2.ID, chCon2.GroupID, chCon2.Name, chCon2.Thumbnail)
-		db.InsertVideo(viContent.ID, chCon2.ID, chCon2.GroupID, viContent.Title)
-		return true, "チャンネル・動画を追加しました"
+		//fmt.Println("チャンネルを非確認")
+		//chCon2 := GetChannelContent(service, viContent.ChannelID, viContent.GroupID)
+		//db.AddChannel(chCon2.ID, chCon2.GroupID, chCon2.Name, chCon2.Thumbnail)
+		//db.InsertVideo(viContent.ID, chCon2.ID, chCon2.GroupID, viContent.Title)
+		//return true, "チャンネル・動画を追加しました"
+
+		return false, "チャンネルが存在しません"
 	default:
 		return false, "既に追加されています"
 	}

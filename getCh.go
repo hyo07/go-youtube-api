@@ -38,7 +38,7 @@ func main() {
 }
 
 //APIクライアント生成
-func getClient1() *youtube.Service {
+func getClient1() (service *youtube.Service) {
 	developerKey := os.Getenv("youtube_key")
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: developerKey},
@@ -47,23 +47,23 @@ func getClient1() *youtube.Service {
 	if err != nil {
 		log.Fatalf("Errr creating new Youtube client: %v", err)
 	}
-	return service
+	return
 }
 
 //チャンネル情報を取得
-func getChannelContent1(service *youtube.Service, channelID string, gID uint) db.Channel {
+func getChannelContent1(service *youtube.Service, channelID string, gID uint) (chContent db.Channel) {
 	call := service.Channels.List("snippet,contentDetails").Id(channelID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	chContent := db.Channel{
+	chContent = db.Channel{
 		ID:        channelID,
 		GroupID:   gID,
 		Name:      resp.Items[0].Snippet.Title,
 		Thumbnail: resp.Items[0].Snippet.Thumbnails.Default.Url,
 	}
 
-	return chContent
+	return
 }

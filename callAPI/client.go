@@ -9,7 +9,7 @@ import (
 )
 
 //APIクライアント生成
-func GetClient() *youtube.Service {
+func GetClient() (service *youtube.Service) {
 	developerKey := os.Getenv("youtube_key")
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: developerKey},
@@ -18,5 +18,5 @@ func GetClient() *youtube.Service {
 	if err != nil {
 		log.Fatalf("Errr creating new Youtube client: %v", err)
 	}
-	return service
+	return
 }

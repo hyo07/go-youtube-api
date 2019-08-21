@@ -1,33 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+{{define "body"}}
+    <div>
+        <ul>
+            {{range .groups}}
+                <ul>
+                    <li>グループ名: {{.Name}}</li>
+                    <li>グループID: {{.ID}}</li>
+                    <li><a href="/group/{{.ID}}">グループページへ飛ぶ</a></li>
+                    <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                </ul>
+            {{end}}
+        </ul>
+    </div>
 
-
-<header>
-    <label><a href="/index">index</a></label>
-    <label><a href="/channels">channels</a></label>
-    <label><a href="/groups">groups</a></label>
-</header>
-
-<body>
-
-
-<div>
-    <ul>
-        {{range .groups}}
-            <ul>
-                <li>グループ名: {{.Name}}</li>
-                <li>グループID: {{.ID}}</li>
-                <li><a href="/group/{{.ID}}">グループページへ飛ぶ</a></li>
-                <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
-            </ul>
-        {{end}}
-    </ul>
-</div>
-
-</body>
-</html>
-
+{{end}}

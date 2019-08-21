@@ -38,12 +38,11 @@ func ReadList(chID string) (bool, string) {
 }
 
 //歌ってみた動画の再生リストを抽出
-func getSingPlaylist(service *youtube.Service, channelID string) string {
+func getSingPlaylist(service *youtube.Service, channelID string) (playlistID string) {
 	var (
 		nextPageToken string
 		plIndex       int64
 		asari         func(ind int64, token string)
-		playlistID    string
 		itemsConts    int64
 	)
 
@@ -81,14 +80,13 @@ func getSingPlaylist(service *youtube.Service, channelID string) string {
 	}
 	asari(0, nextPageToken)
 
-	return playlistID
+	return
 }
 
 //プレイリストの中身を漁る
-func getPlaylistContnt(service *youtube.Service, playlistID string) []map[string]string {
+func getPlaylistContnt(service *youtube.Service, playlistID string) (reS []map[string]string) {
 
 	var (
-		reS           []map[string]string
 		content       map[string]string
 		nextPageToken string
 		plIndex       int64
@@ -124,7 +122,7 @@ func getPlaylistContnt(service *youtube.Service, playlistID string) []map[string
 	}
 	asari(0, nextPageToken)
 
-	return reS
+	return
 }
 
 //各動画の中身を漁る

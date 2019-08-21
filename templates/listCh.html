@@ -1,39 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+{{define "body"}}
 
+    <h2>検索</h2>
+    <form method="get" action="/channels">
+        <p><input type="text" name="chName" placeholder="チャンネル名を入力"></p>
+        <p><input type="submit" value="Send"></p>
+    </form>
 
-<header>
-    <label><a href="/index">index</a></label>
-    <label><a href="/channels">channels</a></label>
-    <label><a href="/groups">groups</a></label>
-</header>
+    <div>
+        <ul>
+            {{range .channels}}
+                <ul>
+                    <li><img src="{{.Thumbnail}}" alt=""></li>
+                    <li>Title: {{.Name}}</li>
+                    <li>グループ: {{.Group.Name}} <a href="/group/{{.GroupID}}">グループページへ飛ぶ</a></li>
+                    <li><a href="/channel/{{.ID}}">個別ページへ飛ぶ</a></li>
+                    <li><a href="https://www.youtube.com/channel/{{.ID}}">リンク</a></li>
+                    <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                </ul>
+            {{end}}
+        </ul>
+    </div>
 
-<body>
-
-<h2>検索</h2>
-<form method="get" action="/channels">
-    <p><input type="text" name="chName" placeholder="チャンネル名を入力"></p>
-    <p><input type="submit" value="Send"></p>
-</form>
-
-<div>
-    <ul>
-        {{range .channels}}
-            <ul>
-                <li><img src="{{.Thumbnail}}" alt=""></li>
-                <li>Title: {{.Name}}</li>
-                <li>グループ: {{.Group.Name}} <a href="/group/{{.GroupID}}">グループページへ飛ぶ</a></li>
-                <li><a href="/channel/{{.ID}}">個別ページへ飛ぶ</a></li>
-                <li><a href="https://www.youtube.com/channel/{{.ID}}">リンク</a></li>
-                <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
-            </ul>
-        {{end}}
-    </ul>
-</div>
-
-</body>
-</html>
+{{end}}

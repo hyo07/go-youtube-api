@@ -5,13 +5,22 @@ import (
 )
 
 //グループ情報取得
-func GroupInfo(gID uint) db.Group {
+func GroupInfo(gID uint) (group db.Group) {
 	database := db.ConnectDB()
 	defer database.Close()
 	database.LogMode(true)
 
-	var group db.Group
 	database.Where("id = ?", gID).Preload("Channel").First(&group)
 
-	return group
+	return
+}
+
+func GroupInfoNoCh(gID uint) (group db.Group) {
+	database := db.ConnectDB()
+	defer database.Close()
+	database.LogMode(true)
+
+	database.Where("id = ?", gID).First(&group)
+
+	return
 }

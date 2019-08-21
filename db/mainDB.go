@@ -110,6 +110,24 @@ func CheckExistVideo(chID string, viID string) int {
 	return 1
 }
 
+//渡された動画が既にDBにないか確認
+func CheckExistChannel(chID string) bool {
+	db := ConnectDB()
+	defer db.Close()
+	//db.LogMode(true)
+
+	var channel Channel
+
+	db.Where("id = ?", chID).Find(&channel)
+	//チャンネルすら無いのか・チャンネルはあるが動画はないのか・どっちも既にあるのか
+	if channel.ID == "" {
+		//存在しなければtrue
+		return true
+	} else {
+		return false
+	}
+}
+
 //動画をDBに保存
 func InsertVideo(viID string, chID string, gID uint, title string) {
 	db := ConnectDB()
