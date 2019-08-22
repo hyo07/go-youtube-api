@@ -16,7 +16,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
+
+var reS []map[string]string
 
 func main() {
 	database, err := gorm.Open("sqlite3", "./db/test.sqlite3")
@@ -32,8 +35,13 @@ func main() {
 	for _, channel := range channels {
 		chID := channel.ID
 		plID := getSingPlaylist4(service, chID)
-		if plID != "" {
-			ret := getPlaylistContn4(service, plID)
+		if len(plID) != 0 {
+			//ret := getPlaylistContn4(service, plID)
+			for _, pl := range plID {
+				getPlaylistContn4(service, pl)
+				time.Sleep(3)
+			}
+			ret := reS
 
 			fmt.Println(ret)
 
@@ -76,32 +84,13 @@ func getClient4() *youtube.Service {
 	return service
 }
 
-//コマンドラインで受け取った引数を検索用の文字列に変換
-func summarySearchWord4(words []string) string {
-	var re string
-	for _, s := range words {
-		re += s + " "
-	}
-	return re
-}
-
-//検索用ワードからチャンネルを検索
-func searchChannelID4(service *youtube.Service, name string) string {
-	call := service.Search.List("snippet").Q(name).MaxResults(1).Type("channel")
-	resp, err := call.Do()
-	if err != nil {
-		panic(err)
-	}
-	return resp.Items[0].Snippet.ChannelId
-}
-
 //歌ってみた動画の再生リストを抽出
-func getSingPlaylist4(service *youtube.Service, channelID string) string {
+func getSingPlaylist4(service *youtube.Service, channelID string) []string {
 	var (
 		nextPageToken string
 		plIndex       int64
 		asari         func(ind int64, token string)
-		playlistID    string
+		playlistID    []string
 		itemsConts    int64
 	)
 
@@ -120,16 +109,21 @@ func getSingPlaylist4(service *youtube.Service, channelID string) string {
 
 		//再生リストの名前で「歌ってみた」動画を判別
 		for _, playlist := range resp.Items {
-			if (strings.Contains(playlist.Snippet.Title, "歌")) || (strings.Contains(playlist.Snippet.Title, "うた")) {
-				if (!strings.Contains(playlist.Snippet.Title, "配信")) &&
-					(!strings.Contains(playlist.Snippet.Title, "枠")) &&
-					(!strings.Contains(playlist.Snippet.Title, "わく")) &&
-					(!strings.Contains(playlist.Snippet.Title, "雑談")) &&
-					(!strings.Contains(playlist.Snippet.Title, "放送")) {
-					if playlist.ContentDetails.ItemCount > itemsConts {
-						playlistID = playlist.Id
-					}
-				}
+			if (strings.Contains(playlist.Snippet.Title, "歌")) ||
+				(strings.Contains(playlist.Snippet.Title, "うた")) ||
+				(strings.Contains(playlist.Snippet.Title, "sing")) ||
+				(strings.Contains(playlist.Snippet.Title, "Music")) {
+				//if (!strings.Contains(playlist.Snippet.Title, "配信")) &&
+				//	(!strings.Contains(playlist.Snippet.Title, "枠")) &&
+				//	(!strings.Contains(playlist.Snippet.Title, "わく")) &&
+				//	(!strings.Contains(playlist.Snippet.Title, "雑談")) &&
+				//	(!strings.Contains(playlist.Snippet.Title, "放送"))
+				//{
+				//if playlist.ContentDetails.ItemCount > itemsConts {
+				//	playlistID = playlist.Id
+				//}
+				playlistID = append(playlistID, playlist.Id)
+				//}
 			}
 		}
 		if plIndex > 50 {
@@ -144,10 +138,10 @@ func getSingPlaylist4(service *youtube.Service, channelID string) string {
 }
 
 //プレイリストの中身を漁る
-func getPlaylistContn4(service *youtube.Service, playlistID string) []map[string]string {
+func getPlaylistContn4(service *youtube.Service, playlistID string) {
 
 	var (
-		reS           []map[string]string
+		//reS           []map[string]string
 		content       map[string]string
 		nextPageToken string
 		plIndex       int64
@@ -167,13 +161,17 @@ func getPlaylistContn4(service *youtube.Service, playlistID string) []map[string
 
 		for _, item := range resp.Items {
 			//非公開動画は除外・時間で動画のみ抽出
-			if (item.Snippet.Title != "Private video") && (checkVideoTime4(filteringSingVideo4(service, item.ContentDetails.VideoId))) {
-				content = map[string]string{
-					"title":     item.Snippet.Title,
-					"videoID":   item.ContentDetails.VideoId,
-					"channelID": item.Snippet.ChannelId,
+			//if (item.Snippet.Title != "Private video") && (checkVideoTime4(filteringSingVideo4(service, item.ContentDetails.VideoId))) {
+			if item.Snippet.Title != "Private video" {
+				videoDuration, videoChId := filteringSingVideo4(service, item.ContentDetails.VideoId)
+				if checkVideoTime4(videoDuration) {
+					content = map[string]string{
+						"title":     item.Snippet.Title,
+						"videoID":   item.ContentDetails.VideoId,
+						"channelID": videoChId,
+					}
+					reS = append(reS, content)
 				}
-				reS = append(reS, content)
 			}
 		}
 		if plIndex > 50 {
@@ -184,18 +182,21 @@ func getPlaylistContn4(service *youtube.Service, playlistID string) []map[string
 	asari(0, nextPageToken)
 	fmt.Println("---------------------\n" + "合計取得数： " + strconv.Itoa(len(reS)) + "\n---------------------")
 
-	return reS
+	//return
 }
 
 //各動画の中身を漁る
-func filteringSingVideo4(service *youtube.Service, videoID string) string {
-	call := service.Videos.List("contentDetails").Id(videoID)
+func filteringSingVideo4(service *youtube.Service, videoID string) (string, string) {
+	call := service.Videos.List("snippet,contentDetails").Id(videoID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	return resp.Items[0].ContentDetails.Duration
+	//fmt.Println(resp.Items[0].ContentDetails.Duration)
+	//fmt.Println(resp.Items[0].Snippet.ChannelId)
+	//fmt.Println(resp.Items[0].Snippet.Title)
+	return resp.Items[0].ContentDetails.Duration, resp.Items[0].Snippet.ChannelId
 }
 
 //「歌ってみた動画」かどうかの判別

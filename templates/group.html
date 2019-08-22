@@ -4,6 +4,21 @@
     <la><a href="/group/{{.group.ID}}">動画</a></la>
     <la><a href="/group/{{.group.ID}}?display=channel">チャンネル</a></la>
 
+    {{if .videos}}
+        <h2>曲検索</h2>
+        <form method="get" action="/group/{{.group.ID}}">
+            <p><input type="text" name="viName" placeholder="動画名を入力"></p>
+            <p><input type="submit" value="Send"></p>
+        </form>
+    {{else}}
+        <h2>チャンネル検索</h2>
+        <form method="get" action="/group/{{.group.ID}}">
+            <input type="hidden" name="display" value="channel">
+            <p><input type="text" name="chName" placeholder="チャンネル名を入力"></p>
+            <p><input type="submit" value="Send"></p>
+        </form>
+    {{end}}
+
 
     <div>
         <h2>グループ情報</h2>
@@ -14,32 +29,36 @@
         </ul>
     </div>
 
-    <div>
-        <ul>
-            {{range .group.Channel}}
-                <ul>
-                    <li>チャンネル名: {{.Name}} <a href="/channel/{{.ID}}">個別ページへ飛ぶ</a></li>
-                    <li>URL: <a href="https://www.youtube.com/channel/{{.ID}}">リンク</a></li>
-                    <img src="{{.Thumbnail}}" alt="">
-                    <p><strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
-                    </p>
-                </ul>
-            {{end}}
-        </ul>
-    </div>
+    {{if .channels}}
+        <div>
+            <ul>
+                {{range .channels}}
+                    <ul>
+                        <li>チャンネル名: {{.Name}} <a href="/channel/{{.ID}}">個別ページへ飛ぶ</a></li>
+                        <li>URL: <a href="https://www.youtube.com/channel/{{.ID}}">リンク</a></li>
+                        <img src="{{.Thumbnail}}" alt="">
+                        <p><strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                        </p>
+                    </ul>
+                {{end}}
+            </ul>
+        </div>
+    {{end}}
 
-    <div>
-        <ul>
-            {{range .videos}}
-                <ul>
-                    <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt="">
-                        <label><a href="/video/{{.ID}}">詳細</a></label></li>
-                    <li>Title: {{.Title}}</li>
-                    <li>Channel: {{.Channel.Name}} <a href="/channel/{{.ChannelID}}">個別ページへ飛ぶ</a></li>
-                    <li><a href="https://www.youtube.com/watch?v={{.ID}}" target="_blank">リンク</a></li>
-                    <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
-                </ul>
-            {{end}}
-        </ul>
-    </div>
+    {{if .videos}}
+        <div>
+            <ul>
+                {{range .videos}}
+                    <ul>
+                        <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt="">
+                            <label><a href="/video/{{.ID}}">詳細</a></label></li>
+                        <li>Title: {{.Title}}</li>
+                        <li>Channel: {{.Channel.Name}} <a href="/channel/{{.ChannelID}}">個別ページへ飛ぶ</a></li>
+                        <li><a href="https://www.youtube.com/watch?v={{.ID}}" target="_blank">リンク</a></li>
+                        <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                    </ul>
+                {{end}}
+            </ul>
+        </div>
+    {{end}}
 {{end}}

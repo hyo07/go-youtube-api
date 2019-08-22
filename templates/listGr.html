@@ -1,4 +1,11 @@
 {{define "body"}}
+
+    <h2>検索</h2>
+    <form method="get" action="/groups">
+        <p><input type="text" name="gName" placeholder="グループ名を入力"></p>
+        <p><input type="submit" value="Send"></p>
+    </form>
+
     <div>
         <ul>
             {{range .groups}}

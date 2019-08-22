@@ -17,7 +17,7 @@ func ReadList(chID string) (bool, string) {
 	if plID == "" {
 		return false, "歌ってみたプレイリストが見つかりませんでした"
 	}
-	ret := getPlaylistContnt(service, plID)
+	ret := getPlaylistContnt(service, plID, chID)
 	groupID := db.SearchGroup(chID)
 	if !db.CheckExistGroup(groupID) {
 		return false, "与えられたグループが存在しません"
@@ -84,7 +84,7 @@ func getSingPlaylist(service *youtube.Service, channelID string) (playlistID str
 }
 
 //プレイリストの中身を漁る
-func getPlaylistContnt(service *youtube.Service, playlistID string) (reS []map[string]string) {
+func getPlaylistContnt(service *youtube.Service, playlistID string, channelID string) (reS []map[string]string) {
 
 	var (
 		content       map[string]string
@@ -106,13 +106,16 @@ func getPlaylistContnt(service *youtube.Service, playlistID string) (reS []map[s
 
 		for _, item := range resp.Items {
 			//非公開動画は除外・時間で動画のみ抽出
-			if (item.Snippet.Title != "Private video") && (CheckVideoTime(filteringSingVideo(service, item.ContentDetails.VideoId))) {
-				content = map[string]string{
-					"title":     item.Snippet.Title,
-					"videoID":   item.ContentDetails.VideoId,
-					"channelID": item.Snippet.ChannelId,
+			if item.Snippet.Title != "Private video" {
+				videoDuration, videoChId := filteringSingVideo(service, item.ContentDetails.VideoId)
+				if CheckVideoTime(videoDuration) {
+					content = map[string]string{
+						"title":     item.Snippet.Title,
+						"videoID":   item.ContentDetails.VideoId,
+						"channelID": videoChId,
+					}
+					reS = append(reS, content)
 				}
-				reS = append(reS, content)
 			}
 		}
 		if plIndex > 50 {
@@ -126,12 +129,12 @@ func getPlaylistContnt(service *youtube.Service, playlistID string) (reS []map[s
 }
 
 //各動画の中身を漁る
-func filteringSingVideo(service *youtube.Service, videoID string) string {
+func filteringSingVideo(service *youtube.Service, videoID string) (string, string) {
 	call := service.Videos.List("contentDetails").Id(videoID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	return resp.Items[0].ContentDetails.Duration
+	return resp.Items[0].ContentDetails.Duration, resp.Items[0].Snippet.ChannelId
 }

@@ -176,13 +176,16 @@ func getPlaylistContnt3(service *youtube.Service, playlistID string) []map[strin
 
 		for _, item := range resp.Items {
 			//非公開動画は除外・時間で動画のみ抽出
-			if (item.Snippet.Title != "Private video") && (checkVideoTime3(filteringSingVideo3(service, item.ContentDetails.VideoId))) {
-				content = map[string]string{
-					"title":     item.Snippet.Title,
-					"videoID":   item.ContentDetails.VideoId,
-					"channelID": item.Snippet.ChannelId,
+			if item.Snippet.Title != "Private video" {
+				videoDuration, videoChId := filteringSingVideo3(service, item.ContentDetails.VideoId)
+				if checkVideoTime3(videoDuration) {
+					content = map[string]string{
+						"title":     item.Snippet.Title,
+						"videoID":   item.ContentDetails.VideoId,
+						"channelID": videoChId,
+					}
+					reS = append(reS, content)
 				}
-				reS = append(reS, content)
 			}
 		}
 		if plIndex > 50 {
@@ -197,14 +200,14 @@ func getPlaylistContnt3(service *youtube.Service, playlistID string) []map[strin
 }
 
 //各動画の中身を漁る
-func filteringSingVideo3(service *youtube.Service, videoID string) string {
+func filteringSingVideo3(service *youtube.Service, videoID string) (string, string) {
 	call := service.Videos.List("contentDetails").Id(videoID)
 	resp, err := call.Do()
 	if err != nil {
 		panic(err)
 	}
 
-	return resp.Items[0].ContentDetails.Duration
+	return resp.Items[0].ContentDetails.Duration, resp.Items[0].Snippet.ChannelId
 }
 
 //「歌ってみた動画」かどうかの判別

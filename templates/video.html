@@ -3,7 +3,7 @@
         <h2>ビデオ情報</h2>
         <ul>
             <li>タイトル: {{.video.Title}}</li>
-            <li>URL: <a href="https://www.youtube.com/watch?v={{.video.ID}}">リンク</a></li>
+            <li>URL: <a href="https://www.youtube.com/watch?v={{.video.ID}}" target="_blank">リンク</a></li>
             <li><img src="https://i.ytimg.com/vi/{{.video.ID}}/default.jpg" alt=""></li>
             <li>
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/{{.video.ID}}" frameborder="0"

@@ -1,0 +1,57 @@
+{{define "body"}}
+    <h1 style="color: red">{{.message}}</h1>
+
+    {{if .channel}}
+        <h1>以下の情報を追加しました</h1>
+        <div>
+            <h2>チャンネル情報</h2>
+            <ul>
+                <li>チャンネル名: {{.channel.Name}}</li>
+                <li>URL: <a href="https://www.youtube.com/channel/{{.channel.ID}}">リンク</a></li>
+                <li>グループID: {{.channel.GroupID}}</li>
+                <li>グループ名: {{.channel.Group.Name}} <a href="/group/{{.channel.GroupID}}">グループページへ飛ぶ</a></li>
+                <img src="{{.channel.Thumbnail}}" alt="">
+                <p><strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                </p>
+            </ul>
+
+            {{if .videos}}
+                <h2>ビデオ情報</h2>
+                <ul>
+                    {{range .videos}}
+                        <li><img src="https://i.ytimg.com/vi/{{.ID}}/default.jpg" alt="">
+                            <label><a href="/video/{{.ID}}">詳細</a></label></li>
+                        <li>Title: {{.Title}}</li>
+                        <li>Channel: {{.Channel.Name}} <a href="/channel/{{.ChannelID}}">個別ページへ飛ぶ</a></li>
+                        <li><a href="https://www.youtube.com/watch?v={{.ID}}" target="_blank">リンク</a></li>
+                        <strong>----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</strong>
+                    {{end}}
+                </ul>
+            {{end}}
+        </div>
+    {{end}}
+
+    {{if .video}}
+        <h1>以下の動画を追加しました</h1>
+        <div>
+            <h2>ビデオ情報</h2>
+            <ul>
+                <li>タイトル: {{.video.Title}}</li>
+                <li>URL: <a href="https://www.youtube.com/watch?v={{.video.ID}}">リンク</a></li>
+                <li><img src="https://i.ytimg.com/vi/{{.video.ID}}/default.jpg" alt=""></li>
+                <li>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/{{.video.ID}}" frameborder="0"
+                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                </li>
+            </ul>
+            <h2>その他情報</h2>
+            <ul>
+                <li>チャンネル: {{.video.Channel.Name}} <a href="/channel/{{.video.ChannelID}}">個別ページへ飛ぶ</a></li>
+                <li>グループID: {{.video.GroupID}}</li>
+                <li>グループ名: {{.video.Group.Name}} <a href="/group/{{.video.GroupID}}">グループページへ飛ぶ</a></li>
+            </ul>
+        </div>
+    {{end}}
+
+{{end}}

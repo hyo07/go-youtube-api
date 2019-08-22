@@ -1,5 +1,12 @@
 {{define "body"}}
 
+    <h2>曲検索</h2>
+    <form method="get" action="/channel/{{.channel.ID}}">
+        <p><input type="text" name="viName" placeholder="動画名を入力"></p>
+        <p><input type="submit" value="Send"></p>
+    </form>
+
+
     <div>
         <h2>チャンネル情報</h2>
         <ul>

@@ -10,17 +10,21 @@ func GroupInfo(gID uint) (group db.Group) {
 	defer database.Close()
 	database.LogMode(true)
 
-	database.Where("id = ?", gID).Preload("Channel").First(&group)
+	database.Where("id = ?", gID).First(&group)
 
 	return
 }
 
-func GroupInfoNoCh(gID uint) (group db.Group) {
+func GroupHasCh(gID uint, chName string, page string) (channels []db.Channel) {
 	database := db.ConnectDB()
 	defer database.Close()
 	database.LogMode(true)
 
-	database.Where("id = ?", gID).First(&group)
+	offset := Page2Offset(page)
+	database.Where("group_id = ? AND name LIKE ?", gID, "%"+chName+"%").
+		Order("name").
+		Offset(offset).Limit(10).
+		Preload("Group").Find(&channels)
 
 	return
 }

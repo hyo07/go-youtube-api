@@ -10,7 +10,11 @@ func VideoInfo(vID string) (video db.Video) {
 	defer database.Close()
 	database.LogMode(true)
 
-	database.Where("id = ?", vID).Preload("Channel").Preload("Group").First(&video)
+	database.
+		Where("id = ?", vID).
+		Preload("Channel").
+		Preload("Group").
+		First(&video)
 
 	return
 }

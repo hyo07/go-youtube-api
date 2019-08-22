@@ -17,10 +17,8 @@ func main() {
 
 	//TOP
 	router.GET("/", func(ctx *gin.Context) {
-		html := template.Must(template.ParseFiles("templates/base.html", "templates/top.html"))
-		router.SetHTMLTemplate(html)
-
-		ctx.HTML(200, "base.html", gin.H{})
+		ctx.Request.URL.Path = "/index"
+		router.HandleContext(ctx)
 	})
 
 	//INDEX
@@ -29,21 +27,15 @@ func main() {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
 		router.SetHTMLTemplate(html)
 
-		viName := ctx.Query("viName")
-		if viName == "" {
-			ctx.HTML(200, "base.html", gin.H{"videos": back.RandomVideos()})
-		} else {
-			ctx.HTML(200, "base.html", gin.H{"videos": back.RandomSearchVideos(viName)})
-		}
+		ctx.HTML(200, "base.html", gin.H{"videos": back.RandomVideos(ctx.Query("viName"))})
 	})
 
-	//新しく動画を追加
-	//Todo /addにPOSTで飛んじゃってるから、リダイレクトさせて、かつメッセージも渡したい
+	//新しく情報を追加
 	router.GET("/add", func(ctx *gin.Context) {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/add.html"))
 		router.SetHTMLTemplate(html)
 
-		ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList()})
+		ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList("", "")})
 	})
 
 	//ビデオ追加
@@ -57,13 +49,16 @@ func main() {
 			video := back.VideoInfo(viID)
 			ctx.HTML(200, "base.html", gin.H{"message": message, "video": video})
 		} else {
-			ctx.HTML(200, "base.html", gin.H{"message": message})
+			//TODO リダイレクトとしては不適切？ /addにmessageだけ送りたいがどうしようか？
+			html := template.Must(template.ParseFiles("templates/base.html", "templates/add.html"))
+			router.SetHTMLTemplate(html)
+			ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList("", ""), "message": message})
 		}
 	})
 
 	//チャンネル追加
 	router.POST("/add-ch", func(ctx *gin.Context) {
-		html := template.Must(template.ParseFiles("templates/base.html", "templates/add.html"))
+		html := template.Must(template.ParseFiles("templates/base.html", "templates/added.html"))
 		router.SetHTMLTemplate(html)
 
 		inputURL := ctx.PostForm("channel-url")
@@ -75,9 +70,14 @@ func main() {
 		if status {
 			chID := callAPI.Url2chID(inputURL)
 			channel := back.ChannelInfo(chID)
-			ctx.HTML(200, "base.html", gin.H{"message": message, "channel": channel})
+			callAPI.ReadList(chID)
+			videos := back.ChannelContents(chID, "", "1")
+			ctx.HTML(200, "base.html", gin.H{"message": message, "channel": channel, "videos": videos})
 		} else {
-			ctx.HTML(200, "base.html", gin.H{"message": message})
+			//TODO リダイレクトとしては不適切？ /addにmessageだけ送りたいがどうしようか？
+			html := template.Must(template.ParseFiles("templates/base.html", "templates/add.html"))
+			router.SetHTMLTemplate(html)
+			ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList("", ""), "message": message})
 		}
 	})
 
@@ -91,16 +91,17 @@ func main() {
 	})
 
 	//チャンネル情報と、そのチャンネルの動画を全て表示
+	//TODO ページ上限取得
 	router.GET("/channel/:chID", func(ctx *gin.Context) {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/channel.html"))
 		router.SetHTMLTemplate(html)
-
-		videos := back.ChannelContents(ctx.Param("chID"))
+		videos := back.ChannelContents(ctx.Param("chID"), ctx.Query("viName"), ctx.Query("page"))
 		channel := back.ChannelInfo(ctx.Param("chID"))
 		ctx.HTML(200, "base.html", gin.H{"videos": videos, "channel": channel})
 	})
 
 	//グループ情報と、そのグループに所属するチャンネル一覧。また、そのチャンネルらの持つ動画一覧
+	//TODO ページ上限取得
 	router.GET("/group/:gID", func(ctx *gin.Context) {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/group.html"))
 		router.SetHTMLTemplate(html)
@@ -114,35 +115,41 @@ func main() {
 		var group db.Group
 		if display == "channel" {
 			group = back.GroupInfo(uint(gID))
-			ctx.HTML(200, "base.html", gin.H{"group": group})
+			channels := back.GroupHasCh(uint(gID), ctx.Query("chName"), ctx.Query("page"))
+			ctx.HTML(200, "base.html", gin.H{"group": group, "channels": channels})
 		} else {
-			group = back.GroupInfoNoCh(uint(gID))
-			videos := back.GroupContents(uint(gID))
+			group = back.GroupInfo(uint(gID))
+			videos := back.GroupContents(uint(gID), ctx.Query("viName"), ctx.Query("page"))
 			ctx.HTML(200, "base.html", gin.H{"videos": videos, "group": group})
 		}
 	})
 
 	//チャンネルのリスト
+	//TODO ページ上限取得
 	router.GET("/channels", func(ctx *gin.Context) {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/listCh.html"))
 		router.SetHTMLTemplate(html)
 
 		chName := ctx.Query("chName")
-		if chName == "" {
-			ctx.HTML(200, "base.html", gin.H{"channels": back.ChannelList()})
-		} else if chName == "random" {
+		if chName == "random" {
 			ctx.HTML(200, "base.html", gin.H{"channels": back.ChannelRandomList()})
 		} else {
-			ctx.HTML(200, "base.html", gin.H{"channels": back.ChannelSearchList(chName)})
+			ctx.HTML(200, "base.html", gin.H{"channels": back.ChannelSearchList(chName, ctx.Query("page"))})
 		}
 	})
 
 	//グループのリスト
+	//TODO ページ上限取得
 	router.GET("/groups", func(ctx *gin.Context) {
 		html := template.Must(template.ParseFiles("templates/base.html", "templates/listGr.html"))
 		router.SetHTMLTemplate(html)
 
-		ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList()})
+		gName := ctx.Query("gName")
+		if gName == "random" {
+			ctx.HTML(200, "base.html", gin.H{"groups": back.GroupRandomList()})
+		} else {
+			ctx.HTML(200, "base.html", gin.H{"groups": back.GroupList(gName, ctx.Query("page"))})
+		}
 	})
 
 	router.Run()
